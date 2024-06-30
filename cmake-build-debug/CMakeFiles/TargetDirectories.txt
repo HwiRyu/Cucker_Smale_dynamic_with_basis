@@ -1,0 +1,3 @@
+/Users/persist/Desktop/Project_Summer/Cucker_Smale_modling_with_basis_1.2/cmake-build-debug/CMakeFiles/Cucker_Smale_modeling.dir
+/Users/persist/Desktop/Project_Summer/Cucker_Smale_modling_with_basis_1.2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/persist/Desktop/Project_Summer/Cucker_Smale_modling_with_basis_1.2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
