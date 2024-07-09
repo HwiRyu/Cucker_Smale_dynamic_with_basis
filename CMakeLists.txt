@@ -17,5 +17,5 @@ add_executable(Cucker_Smale_modeling main.cpp
         cucker_smale_modeling.h
 )
 
-# Link SFML libraries
-target_link_libraries(Cucker_Smale_modeling sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+# Link SFML and Metal libraries
+target_link_libraries(Cucker_Smale_modeling sfml-system sfml-window sfml-graphics sfml-network sfml-audio "-framework Metal" "-framework MetalKit" "-framework Foundation")

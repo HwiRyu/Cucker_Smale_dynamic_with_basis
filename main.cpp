@@ -43,14 +43,21 @@ int main() {
 
     sf::Text text1("", font, 12);
     text1.setFillColor(sf::Color::Black);
+
     sf::Text time_text("", font, 12);
     time_text.setFillColor(sf::Color::Black);
+
+    sf::Text max_text("", font, 12);
+    max_text.setFillColor(sf::Color::Black);
+
+    sf::Text click_text("", font, 12);
+    click_text.setFillColor(sf::Color::Black);
 
 
     std::random_device rd;
     std::default_random_engine eng(rd());
-    std::uniform_real_distribution<double> pos_dist(-10, 10); // 위치 범위
-    std::uniform_real_distribution<double> vel_dist(-500.0, 1000.0);   // 속도 범위
+    std::uniform_real_distribution<double> pos_dist(-50, 50); // 위치 범위
+    std::uniform_real_distribution<double> vel_dist(-1000.0, 1000.0);   // 속도 범위
 
     for (int i = 0; i < N; i++) {
         particles[i].position[0] = pos_dist(eng);
@@ -60,7 +67,6 @@ int main() {
         particles[i].velocity[0] = vel_dist(eng);
         particles[i].velocity[1] = vel_dist(eng);
         particles[i].velocity[2] = vel_dist(eng);
-
     }
 
 
@@ -71,16 +77,15 @@ int main() {
     bool domain_fixed = true;
     double current_center_x;
     double current_center_y;
-    double pi = Pi * y_angle / 120;      //라디안 값
-    double theta = Pi * (x_angle / 120);
     int delta_size = 5;
     double moving_epsilon = 0;
     double t = 0;
     sf::Time elapsedTime;
     float time_swith = 0.0001;
     bool time_change = false;
-    double max_velocity_difference = 0.0;
     bool center_fixed = false;
+    double click_x, click_y;
+    bool click = false;
 
     sf::Clock clock;
     sf::Clock clock_t;
@@ -116,6 +121,13 @@ int main() {
                     case sf::Keyboard::Right:
                         x_angle -= 1;
                         break;
+                    case sf::Keyboard::R:
+                        for (int i = 0; i < N; i++) {
+                            particles[i].velocity[0] = vel_dist(eng);
+                            particles[i].velocity[1] = vel_dist(eng);
+                            particles[i].velocity[2] = vel_dist(eng);
+                        }
+                        break;
                     case sf::Keyboard::F:
                         if (center_fixed){
                             center_fixed = false;
@@ -123,6 +135,7 @@ int main() {
                         else {
                             center_fixed = true;
                         }
+                        break;
                     case sf::Keyboard::W:
                         if (size <= 200) {
                             graphView.move(sf::Vector2f((graphView.getCenter().x / size) * delta_size,
@@ -144,10 +157,16 @@ int main() {
                         break;
                 }
             }
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    lastMousePos = sf::Mouse::getPosition(window);
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                sf::Time currentTime = clock.getElapsedTime();
+                lastMousePos = sf::Mouse::getPosition(window);
+                startPoint = window.mapPixelToCoords(lastMousePos); // 초기 클릭 위치 저장
+
+                if ((t > 0.0001) & (currentTime - lastClickTime <= sf::seconds(0.1))) {
+                    click = true;
                 }
+
+                lastClickTime = currentTime;
             }
 
             if (event.type == sf::Event::MouseMoved) {
@@ -160,7 +179,6 @@ int main() {
 
                 }
             }
-
 
             if (event.type == sf::Event::Closed)
                 window.close();
@@ -181,15 +199,15 @@ int main() {
             theta += 2 * Pi;
         }
 
+        double max_velocity_difference = 0.0;
+
         for (int i = 0; i < N; ++i) {
-            for (int j = 0; j < N; ++j) {
+            for (int j = i + 1; j < N; ++j) {
                 double diff_x = particles[i].velocity[0] - particles[j].velocity[0];
                 double diff_y = particles[i].velocity[1] - particles[j].velocity[1];
                 double diff_z = particles[i].velocity[2] - particles[j].velocity[2];
-                double velocity_difference = std::sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
-                if (velocity_difference > max_velocity_difference) {
-                    max_velocity_difference = velocity_difference;
-                }
+                double velocity_diff = std::sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
+                max_velocity_difference = std::max(max_velocity_difference, velocity_diff);
             }
         }
 
@@ -207,6 +225,17 @@ int main() {
             point_fix(window, graphView,
                       center_particles[0], center_particles[1], center_particles[2],
                       size, theta, pi);
+        }
+        if (click){
+            click_x = x_scale(startPoint.x, 1/size);
+            click_y = y_scale(startPoint.y, 1/size);
+
+            auto result = backtracking(click_x, click_y, theta, pi);
+            click_x = result.x;
+            click_y = result.y;
+
+            change_velocity(particles, click_x, click_y, 0);
+            click = false;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -239,6 +268,15 @@ int main() {
         time_text.setString("time: " + std::to_string(t));
         time_text.setPosition(graphView.getCenter().x + width / 2 - 180, graphView.getCenter().y - height / 2 + 70);
         window.draw(time_text);
+
+        max_text.setString("Max: " + std::to_string(max_velocity_difference));
+        max_text.setPosition(graphView.getCenter().x + width / 2 - 180, graphView.getCenter().y - height / 2 + 90);
+        window.draw(max_text);
+
+
+        click_text.setString("click_x:" + std::to_string(click_x) + "click_x" + std::to_string(click_y));
+        click_text.setPosition(graphView.getCenter().x + width / 2 - 300, graphView.getCenter().y - height / 2 + 110);
+        window.draw(click_text);
 
         window.display();
 

@@ -6,12 +6,12 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
-const int N = 300;
-double lambda = 100;
+const int N = 100;
+double lambda = 150;
 const double step_size = 0.0001;
 
 double psi_function(double s) {
-    return pow(s, 1) / (1 + pow(s, 2.2));
+    return pow(s, 1) / (1 + pow(s, 1.8));
 }
 
 double norm_distant(const double component_i[3], const double component_j[3]) {
@@ -132,7 +132,6 @@ void step_for_time(double current_time, double initial_time, Particle *particles
 }
 
 
-
 void cucker_smale_equation(sf::RenderWindow &window, sf::VertexArray &graph, Particle *particles,
                            double size, double theta, double pi) {
     std::vector<sf::CircleShape> circles(N, sf::CircleShape(std::max(size / 20.0, 2.0)));
@@ -141,8 +140,10 @@ void cucker_smale_equation(sf::RenderWindow &window, sf::VertexArray &graph, Par
     }
     for (int i = 0; i < N; i++) {
         circles[i].setPosition(
-                x_scale(rotation(particles[i].position[0],particles[i].position[1],particles[i].position[2],theta, pi).x, size),
-                y_scale(rotation(particles[i].position[0],particles[i].position[1],particles[i].position[2], theta, pi).y, size));
+                x_scale(rotation(particles[i].position[0], particles[i].position[1], particles[i].position[2], theta,
+                                 pi).x, size),
+                y_scale(rotation(particles[i].position[0], particles[i].position[1], particles[i].position[2], theta,
+                                 pi).y, size));
     }
 // 원형 객체 그리기
     for (const auto &circle: circles) {
@@ -150,5 +151,26 @@ void cucker_smale_equation(sf::RenderWindow &window, sf::VertexArray &graph, Par
     }
 }
 
+void change_velocity(Particle *particles, double x, double y, double z = 0) {
+    double direction[3] = {0, 0, 0};
+    double target[3];
+    target[0] = x;
+    target[1] = y;
+    target[2] = z;
+
+    for (int i = 0; i < N; i++) {
+        double speed = sqrt(
+                pow(particles[i].velocity[0], 2) + pow(particles[i].velocity[1], 2) + pow(particles[i].velocity[2], 2));
+        for (int k = 0; k < 3; k++) {
+            direction[k] = target[k] - particles[i].position[k];
+        }
+        double denominator = sqrt(pow(direction[0], 2) + pow(direction[1], 2) + pow(direction[2], 2));
+        for (int k = 0; k < 3; k++) {
+            particles[i].velocity[k] = (direction[k]  / denominator) * speed;
+        }
+
+    }
+
+}
 
 #endif //CUCKER_SMALE_MODELING_CUCKER_SMALE_MODELING_H

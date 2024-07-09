@@ -10,6 +10,8 @@ void zero_plane(sf::RenderWindow &window,
                 double pi
 ) {
     sf::Color custom = sf::Color(0, 0, 0, 100);
+    sf::Color custo1 = sf::Color(0, 255, 0, 100);
+
     double length = 1;
     int axe_range = 25;
     view_center_x -= fmod(view_center_x, length);
@@ -47,11 +49,11 @@ void zero_plane(sf::RenderWindow &window,
             graph.append(sf::Vertex(sf::Vector2f(
                                             x_scale(rotation(0, 0, 0, theta, pi).x, size),
                                             y_scale(rotation(0, 0, 0, theta, pi).y, size)),
-                                    custom));
+                                    custo1));
             graph.append(sf::Vertex(sf::Vector2f(
                                             x_scale(rotation(0, 0, 10, theta, pi).x, size),
                                             y_scale(rotation(0, 0, 10, theta, pi).y, size)),
-                                    custom));
+                                    custo1));
             window.draw(graph);
             graph.clear();
         }
