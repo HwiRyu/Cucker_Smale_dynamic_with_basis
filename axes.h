@@ -11,13 +11,14 @@ void zero_plane(sf::RenderWindow &window,
 ) {
     sf::Color custom = sf::Color(0, 0, 0, 100);
     double length = 1;
+    int axe_range = 25;
     view_center_x -= fmod(view_center_x, length);
     view_center_y -= fmod(view_center_y, length);
 
-    double x_start = view_center_x - 10;
-    double x_end = view_center_x + 10;
-    double y_start = view_center_y - 10;
-    double y_end = view_center_y + 10;
+    double x_start = view_center_x - axe_range;
+    double x_end = view_center_x + axe_range;
+    double y_start = view_center_y - axe_range;
+    double y_end = view_center_y + axe_range;
 
     for (double x = x_start; x <= x_end; x += length) {
         for (double y = y_start; y <= y_end; y += length) {

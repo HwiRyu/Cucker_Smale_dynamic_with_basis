@@ -50,7 +50,7 @@ int main() {
     std::random_device rd;
     std::default_random_engine eng(rd());
     std::uniform_real_distribution<double> pos_dist(-10, 10); // 위치 범위
-    std::uniform_real_distribution<double> vel_dist(-50.0, 150.0);   // 속도 범위
+    std::uniform_real_distribution<double> vel_dist(-500.0, 1000.0);   // 속도 범위
 
     for (int i = 0; i < N; i++) {
         particles[i].position[0] = pos_dist(eng);
@@ -62,7 +62,6 @@ int main() {
         particles[i].velocity[2] = vel_dist(eng);
 
     }
-
 
 
     double size = 30;
@@ -78,9 +77,10 @@ int main() {
     double moving_epsilon = 0;
     double t = 0;
     sf::Time elapsedTime;
-    float time_swith = 0.001;
+    float time_swith = 0.0001;
     bool time_change = false;
-
+    double max_velocity_difference = 0.0;
+    bool center_fixed = false;
 
     sf::Clock clock;
     sf::Clock clock_t;
@@ -116,6 +116,13 @@ int main() {
                     case sf::Keyboard::Right:
                         x_angle -= 1;
                         break;
+                    case sf::Keyboard::F:
+                        if (center_fixed){
+                            center_fixed = false;
+                        }
+                        else {
+                            center_fixed = true;
+                        }
                     case sf::Keyboard::W:
                         if (size <= 200) {
                             graphView.move(sf::Vector2f((graphView.getCenter().x / size) * delta_size,
@@ -173,10 +180,34 @@ int main() {
         if (theta < 0) {
             theta += 2 * Pi;
         }
+
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                double diff_x = particles[i].velocity[0] - particles[j].velocity[0];
+                double diff_y = particles[i].velocity[1] - particles[j].velocity[1];
+                double diff_z = particles[i].velocity[2] - particles[j].velocity[2];
+                double velocity_difference = std::sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
+                if (velocity_difference > max_velocity_difference) {
+                    max_velocity_difference = velocity_difference;
+                }
+            }
+        }
+
+        double center_particles[3] = {0, 0, 0};
+
+        for (int k = 0; k < 3; ++k) {
+            for (int i = 0; i < N; ++i) {
+                center_particles[k] += particles[i].position[k];
+            }
+            center_particles[k] /= N;
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//        point_fix(window,graphView, 0,0,0,  size, theta, pi);
-
+        if (center_fixed) {
+            point_fix(window, graphView,
+                      center_particles[0], center_particles[1], center_particles[2],
+                      size, theta, pi);
+        }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

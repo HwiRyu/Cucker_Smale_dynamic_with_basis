@@ -8,7 +8,7 @@
 
 const int N = 300;
 double lambda = 100;
-const double step_size = 0.001;
+const double step_size = 0.0001;
 
 double psi_function(double s) {
     return pow(s, 1) / (1 + pow(s, 2.2));
