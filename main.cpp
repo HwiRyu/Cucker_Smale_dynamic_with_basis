@@ -56,8 +56,8 @@ int main() {
 
     std::random_device rd;
     std::default_random_engine eng(rd());
-    std::uniform_real_distribution<double> pos_dist(-50, 50); // 위치 범위
-    std::uniform_real_distribution<double> vel_dist(-1000.0, 1000.0);   // 속도 범위
+    std::uniform_real_distribution<double> pos_dist(0, 0); // 위치 범위
+    std::uniform_real_distribution<double> vel_dist(-2000.0, 2000.0);   // 속도 범위
 
     for (int i = 0; i < N; i++) {
         particles[i].position[0] = pos_dist(eng);

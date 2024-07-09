@@ -6,12 +6,12 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
-const int N = 100;
-double lambda = 150;
+const int N = 300;
+double lambda = 500;
 const double step_size = 0.0001;
 
 double psi_function(double s) {
-    return pow(s, 1) / (1 + pow(s, 1.8));
+    return pow(s, 1) / (1 + pow(s, 3));
 }
 
 double norm_distant(const double component_i[3], const double component_j[3]) {
