@@ -13,7 +13,9 @@ add_executable(Cucker_Smale_modeling main.cpp
         draw.h
         function.h
         axes.h
-        fix.h)
+        fix.h
+        cucker_smale_modeling.h
+)
 
 # Link SFML libraries
 target_link_libraries(Cucker_Smale_modeling sfml-system sfml-window sfml-graphics sfml-network sfml-audio)

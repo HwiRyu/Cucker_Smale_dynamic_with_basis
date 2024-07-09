@@ -6,23 +6,27 @@
 //5. 시간 조정
 
 const int width = 1500;
-const int height = 800;
+const int height = 900;
 
 
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <sstream>
+#include <random>
+
 #include "rotation.h"
 #include "scale.h"
 #include "function.h"
 #include "draw.h"
 #include "axes.h"
 #include "fix.h"
+#include "cucker_smale_modeling.h"
 
+Particle particles[N];
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(width, height), "Basis");
+    sf::RenderWindow window(sf::VideoMode(width, height), "CSmodel");
 
     sf::Font font;
     if (!font.loadFromFile("/System/Library/Fonts/Monaco.ttf")) {
@@ -30,6 +34,7 @@ int main() {
         return 1;
     }
     sf::VertexArray one(sf::LineStrip);
+    sf::VertexArray two(sf::LineStrip);
 
     sf::View graphView(sf::FloatRect(-width / 2, -height / 2, width, height));
     sf::View initial_View(sf::FloatRect(-width / 2, -height / 2, width, height));
@@ -38,6 +43,26 @@ int main() {
 
     sf::Text text1("", font, 12);
     text1.setFillColor(sf::Color::Black);
+    sf::Text time_text("", font, 12);
+    time_text.setFillColor(sf::Color::Black);
+
+
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_real_distribution<double> pos_dist(-10, 10); // 위치 범위
+    std::uniform_real_distribution<double> vel_dist(-50.0, 150.0);   // 속도 범위
+
+    for (int i = 0; i < N; i++) {
+        particles[i].position[0] = pos_dist(eng);
+        particles[i].position[1] = pos_dist(eng);
+        particles[i].position[2] = pos_dist(eng);
+
+        particles[i].velocity[0] = vel_dist(eng);
+        particles[i].velocity[1] = vel_dist(eng);
+        particles[i].velocity[2] = vel_dist(eng);
+
+    }
+
 
 
     double size = 30;
@@ -51,6 +76,10 @@ int main() {
     double theta = Pi * (x_angle / 120);
     int delta_size = 5;
     double moving_epsilon = 0;
+    double t = 0;
+    sf::Time elapsedTime;
+    float time_swith = 0.001;
+    bool time_change = false;
 
 
     sf::Clock clock;
@@ -61,6 +90,14 @@ int main() {
     sf::Vector2f startPoint;
 
     while (window.isOpen()) {
+
+        elapsedTime = clock_t.getElapsedTime();
+        if (elapsedTime.asSeconds() >= time_swith) {
+            t += time_swith;
+            clock_t.restart();
+            time_change = true;
+        }
+
 
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -138,9 +175,11 @@ int main() {
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        point_fix(window,graphView, 0,0,0,  size, theta, pi);
+//        point_fix(window,graphView, 0,0,0,  size, theta, pi);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
         double view_center_x = graphView.getCenter().x / (size);
         double view_center_y = -graphView.getCenter().y / (size);
@@ -152,15 +191,23 @@ int main() {
             current_center_y = center_y;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+        if (time_change) {
+            step_for_time(t, t - time_swith, particles, psi_function, norm_distant);
+            time_change = false;
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         function_view(window, one, size, one_variable_function, current_center_x, current_center_y, theta, pi);
         zero_plane(window, one, size, current_center_x, current_center_y, theta, pi);
-
+        cucker_smale_equation(window, two, particles, size, theta, pi);
 
         ////////////////////////////////////////////////////////////
         text1.setString("x:" + std::to_string(center_x) + "y" + std::to_string(center_y));
-
-        text1.setPosition(graphView.getCenter().x + 450, graphView.getCenter().y - 366);
+        text1.setPosition(graphView.getCenter().x + width / 2 - 180, graphView.getCenter().y - height / 2 + 50);
         window.draw(text1);
+
+        time_text.setString("time: " + std::to_string(t));
+        time_text.setPosition(graphView.getCenter().x + width / 2 - 180, graphView.getCenter().y - height / 2 + 70);
+        window.draw(time_text);
 
         window.display();
 
